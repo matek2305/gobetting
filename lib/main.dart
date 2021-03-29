@@ -42,13 +42,38 @@ class GoBettingApp extends StatelessWidget {
           middle: Text('GoBetting'),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: ListView.builder(
-              itemBuilder: (_, index) =>
-                  IncomingMatchCardWidget(_incomingMatches[index]),
-              itemCount: _incomingMatches.length,
-            ),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemBuilder: (_, index) =>
+                      IncomingMatchCardWidget(_incomingMatches[index]),
+                  itemCount: _incomingMatches.length,
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CupertinoButton(
+                          child: Text('Cancel'),
+                          onPressed: () {},
+                        ),
+                      ),
+                      Expanded(
+                        child: CupertinoButton.filled(
+                          child: Text('Save'),
+                          onPressed: () {},
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -63,10 +88,10 @@ class IncomingMatchCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 8,
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Card(
+        elevation: 8,
         child: Row(
           children: [
             IncomingMatchSideWidget(
