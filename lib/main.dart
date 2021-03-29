@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import './model/IncomingMatch.dart';
-import './model/MatchScore.dart';
+import './model/incoming_match.dart';
+import './model/match_score.dart';
 
 void main() {
   runApp(GoBettingApp());
@@ -46,7 +46,7 @@ class GoBettingApp extends StatelessWidget {
             padding: const EdgeInsets.all(4.0),
             child: ListView.builder(
               itemBuilder: (_, index) =>
-                  IncomingMatchWidget(_incomingMatches[index]),
+                  IncomingMatchCardWidget(_incomingMatches[index]),
               itemCount: _incomingMatches.length,
             ),
           ),
@@ -56,53 +56,103 @@ class GoBettingApp extends StatelessWidget {
   }
 }
 
-class IncomingMatchWidget extends StatelessWidget {
+class IncomingMatchCardWidget extends StatelessWidget {
   final IncomingMatch _match;
 
-  IncomingMatchWidget(this._match);
+  IncomingMatchCardWidget(this._match);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 8,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Column(
-              children: [
-                IncomingMatchTeamWidget(_match.homeTeamName),
-                IncomingMatchTeamWidget(_match.awayTeamName),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Row(
+          children: [
+            IncomingMatchSideWidget(
+              _match.homeTeamName,
+              _match.bet?.homeTeam,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "?",
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            Text(
+              ':',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+            IncomingMatchSideWidget(
+              _match.awayTeamName,
+              _match.bet?.awayTeam,
+              true,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class IncomingMatchTeamWidget extends StatelessWidget {
-  final String _name;
+class IncomingMatchSideWidget extends StatelessWidget {
+  final String _teamName;
+  final int _teamGoals;
+  final bool _reversed;
 
-  IncomingMatchTeamWidget(this._name);
+  IncomingMatchSideWidget(this._teamName, this._teamGoals,
+      [this._reversed = false]);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Text(
-        _name,
-        style: TextStyle(fontSize: 18),
+    var goalsCounterAfterTeamName = [
+      Flexible(
+        fit: FlexFit.tight,
+        child: Text(
+          _teamName,
+          style: TextStyle(fontSize: 18),
+          textAlign: _reversed ? TextAlign.left : TextAlign.right,
+        ),
       ),
+      GoalsCounterWidget(_teamGoals),
+    ];
+
+    return Expanded(
+      child: Row(
+        children: _reversed
+            ? goalsCounterAfterTeamName.reversed.toList()
+            : goalsCounterAfterTeamName,
+      ),
+    );
+  }
+}
+
+class GoalsCounterWidget extends StatelessWidget {
+  final int _goals;
+
+  GoalsCounterWidget(this._goals);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        IconButton(
+          padding: EdgeInsets.all(4),
+          constraints: BoxConstraints(),
+          icon: Icon(Icons.keyboard_arrow_up_rounded),
+          onPressed: () {},
+        ),
+        Text(
+          '${_goals ?? '?'}',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        IconButton(
+          padding: EdgeInsets.all(4),
+          constraints: BoxConstraints(),
+          icon: Icon(Icons.keyboard_arrow_down_rounded),
+          onPressed: (_goals ?? 0) > 0 ? () {} : null,
+        ),
+      ],
     );
   }
 }

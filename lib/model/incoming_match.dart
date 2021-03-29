@@ -1,4 +1,4 @@
-import './MatchScore.dart';
+import './match_score.dart';
 
 class IncomingMatch {
   final String matchId;
