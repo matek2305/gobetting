@@ -124,11 +124,16 @@ class IncomingMatchSideWidget extends StatelessWidget {
   }
 }
 
-class GoalsCounterWidget extends StatelessWidget {
-  final int _goals;
+class GoalsCounterWidget extends StatefulWidget {
+  int _goals;
 
   GoalsCounterWidget(this._goals);
 
+  @override
+  _GoalsCounterWidgetState createState() => _GoalsCounterWidgetState();
+}
+
+class _GoalsCounterWidgetState extends State<GoalsCounterWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -137,10 +142,12 @@ class GoalsCounterWidget extends StatelessWidget {
           padding: EdgeInsets.all(4),
           constraints: BoxConstraints(),
           icon: Icon(Icons.keyboard_arrow_up_rounded),
-          onPressed: () {},
+          onPressed: () => setState(() {
+            widget._goals = widget._goals != null ? widget._goals + 1 : 0;
+          }),
         ),
         Text(
-          '${_goals ?? '?'}',
+          '${widget._goals ?? '?'}',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -150,7 +157,9 @@ class GoalsCounterWidget extends StatelessWidget {
           padding: EdgeInsets.all(4),
           constraints: BoxConstraints(),
           icon: Icon(Icons.keyboard_arrow_down_rounded),
-          onPressed: (_goals ?? 0) > 0 ? () {} : null,
+          onPressed: (widget._goals ?? 0) > 0
+              ? () => setState(() => widget._goals -= 1)
+              : null,
         ),
       ],
     );
