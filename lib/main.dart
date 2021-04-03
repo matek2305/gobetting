@@ -15,14 +15,12 @@ class GoBettingApp extends StatelessWidget {
       'Chelsea',
       'Arsenal',
       DateTime.now().add(Duration(hours: 3)),
-      null,
     ),
     IncomingMatch(
       '2',
       'Manchester United',
       'Manchester City',
       DateTime.now().add(Duration(hours: 12)),
-      null,
     ),
     IncomingMatch(
       '3',
@@ -94,22 +92,17 @@ class IncomingMatchCardWidget extends StatelessWidget {
         elevation: 8,
         child: Row(
           children: [
-            IncomingMatchSideWidget(
+            TeamNameWidget(
               _match.homeTeamName,
-              _match.bet?.homeTeam,
+              TextAlign.right,
             ),
-            Text(
-              ':',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            MatchScoreCounter(
+              _match.bet,
+              onChange: (score) {
+                print('add unsaved bet = $score for matchId = ${_match.matchId}');
+              },
             ),
-            IncomingMatchSideWidget(
-              _match.awayTeamName,
-              _match.bet?.awayTeam,
-              true,
-            ),
+            TeamNameWidget(_match.awayTeamName),
           ],
         ),
       ),
@@ -117,45 +110,92 @@ class IncomingMatchCardWidget extends StatelessWidget {
   }
 }
 
-class IncomingMatchSideWidget extends StatelessWidget {
+class TeamNameWidget extends StatelessWidget {
   final String _teamName;
-  final int _teamGoals;
-  final bool _reversed;
+  final TextAlign _textAlign;
 
-  IncomingMatchSideWidget(this._teamName, this._teamGoals,
-      [this._reversed = false]);
+  TeamNameWidget(this._teamName, [this._textAlign = TextAlign.left]);
 
   @override
   Widget build(BuildContext context) {
-    var goalsCounterAfterTeamName = [
-      Flexible(
-        fit: FlexFit.tight,
-        child: Text(
-          _teamName,
-          style: TextStyle(fontSize: 18),
-          textAlign: _reversed ? TextAlign.left : TextAlign.right,
-        ),
-      ),
-      GoalsCounterWidget(_teamGoals),
-    ];
-
     return Expanded(
       child: Row(
-        children: _reversed
-            ? goalsCounterAfterTeamName.reversed.toList()
-            : goalsCounterAfterTeamName,
+        children: [
+          Flexible(
+            fit: FlexFit.tight,
+            child: Text(
+              _teamName,
+              style: TextStyle(fontSize: 18),
+              textAlign: _textAlign,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class GoalsCounterWidget extends StatefulWidget {
-  int _goals;
+class MatchScoreCounter extends StatelessWidget {
+  MatchScore? _score;
+  int? _homeTeamScore;
+  int? _awayTeamScore;
+  ValueSetter<MatchScore> _onChange;
 
-  GoalsCounterWidget(this._goals);
+  MatchScoreCounter(this._score,
+      {ValueSetter<MatchScore> onChange = _onChangeNoop})
+      : this._onChange = onChange,
+        this._homeTeamScore = _score?.homeTeam,
+        this._awayTeamScore = _score?.awayTeam;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        GoalsCounterWidget(
+          _score?.homeTeam,
+          onChange: (score) {
+            this._homeTeamScore = score;
+            _notifyOnChangeListener();
+          },
+        ),
+        Text(
+          ':',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        GoalsCounterWidget(
+          _score?.awayTeam,
+          onChange: (score) {
+            this._awayTeamScore = score;
+            _notifyOnChangeListener();
+          },
+        ),
+      ],
+    );
+  }
+
+  void _notifyOnChangeListener() {
+    if (_homeTeamScore != null && _awayTeamScore != null) {
+      _onChange(MatchScore(_homeTeamScore!, _awayTeamScore!));
+    }
+  }
+
+  static _onChangeNoop(MatchScore _) {}
+}
+
+class GoalsCounterWidget extends StatefulWidget {
+  int? _goals;
+  ValueSetter<int> _onChange;
+
+  GoalsCounterWidget(this._goals, {ValueSetter<int> onChange = _onChangeNoop})
+      : this._onChange = onChange;
 
   @override
   _GoalsCounterWidgetState createState() => _GoalsCounterWidgetState();
+
+  static _onChangeNoop(int _) {}
 }
 
 class _GoalsCounterWidgetState extends State<GoalsCounterWidget> {
@@ -167,9 +207,11 @@ class _GoalsCounterWidgetState extends State<GoalsCounterWidget> {
           padding: EdgeInsets.all(4),
           constraints: BoxConstraints(),
           icon: Icon(Icons.keyboard_arrow_up_rounded),
-          onPressed: () => setState(() {
-            widget._goals = widget._goals != null ? widget._goals + 1 : 0;
-          }),
+          onPressed: () {
+            setState(() =>
+                widget._goals = widget._goals != null ? widget._goals! + 1 : 0);
+            widget._onChange(widget._goals!);
+          },
         ),
         Text(
           '${widget._goals ?? '?'}',
@@ -183,7 +225,10 @@ class _GoalsCounterWidgetState extends State<GoalsCounterWidget> {
           constraints: BoxConstraints(),
           icon: Icon(Icons.keyboard_arrow_down_rounded),
           onPressed: (widget._goals ?? 0) > 0
-              ? () => setState(() => widget._goals -= 1)
+              ? () {
+                  setState(() => widget._goals = widget._goals! - 1);
+                  widget._onChange(widget._goals!);
+                }
               : null,
         ),
       ],
