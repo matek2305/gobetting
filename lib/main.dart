@@ -1,77 +1,76 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 
-import './model/incoming_match.dart';
-import './model/match_score.dart';
+import './model/match.dart';
+import 'model/state.dart';
+import 'redux/actions.dart';
+import 'redux/reducers.dart';
 
-void main() {
-  runApp(GoBettingApp());
-}
+void main() => runApp(GoBettingApp());
+
+final Store<GoBettingState> store = Store<GoBettingState>(
+  goBettingStateReducer,
+  initialState: GoBettingState.initial(),
+);
 
 class GoBettingApp extends StatelessWidget {
-  final List<IncomingMatch> _incomingMatches = [
-    IncomingMatch(
-      '1',
-      'Chelsea',
-      'Arsenal',
-      DateTime.now().add(Duration(hours: 3)),
-    ),
-    IncomingMatch(
-      '2',
-      'Manchester United',
-      'Manchester City',
-      DateTime.now().add(Duration(hours: 12)),
-    ),
-    IncomingMatch(
-      '3',
-      'Polska',
-      'Andora',
-      DateTime.now().add(Duration(hours: 2)),
-      MatchScore(4, 0),
-    ),
-  ];
-
-// This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: Text('GoBetting'),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemBuilder: (_, index) =>
-                      IncomingMatchCardWidget(_incomingMatches[index]),
-                  itemCount: _incomingMatches.length,
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CupertinoButton(
-                          child: Text('Cancel'),
-                          onPressed: () {},
-                        ),
+    return StoreProvider<GoBettingState>(
+      store: store,
+      child: CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: Text('GoBetting'),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                StoreConnector<GoBettingState, List<IncomingMatch>>(
+                  converter: (store) => store.state.incomingMatches,
+                  builder: (_, matches) {
+                    return Expanded(
+                      child: ListView.builder(
+                        itemBuilder: (_, index) =>
+                            IncomingMatchCardWidget(matches[index]),
+                        itemCount: matches.length,
                       ),
-                      Expanded(
-                        child: CupertinoButton.filled(
-                          child: Text('Save'),
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              ),
-            ],
+                StoreConnector<GoBettingState, bool>(
+                  converter: (store) => store.state.unsavedBets.isNotEmpty,
+                  builder: (_, hasUnsavedBets) {
+                    return hasUnsavedBets
+                        ? Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: CupertinoButton(
+                                      child: Text('Cancel'),
+                                      onPressed: () {},
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: CupertinoButton.filled(
+                                      child: Text('Save'),
+                                      onPressed: () {},
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -98,9 +97,8 @@ class IncomingMatchCardWidget extends StatelessWidget {
             ),
             MatchScoreCounter(
               _match.bet,
-              onChange: (score) {
-                print('add unsaved bet = $score for matchId = ${_match.matchId}');
-              },
+              onChange: (score) =>
+                  store.dispatch(ChangeBetAction(_match.matchId, score)),
             ),
             TeamNameWidget(_match.awayTeamName),
           ],
