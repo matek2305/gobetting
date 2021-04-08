@@ -5,20 +5,19 @@ import 'package:redux/redux.dart';
 
 import 'model/match.dart';
 import 'model/state.dart';
-import 'redux/actions.dart';
 import 'redux/reducers.dart';
 import 'view/incoming_matches.dart';
 
 void main() => runApp(GoBettingApp());
 
-final Store<GoBettingState> store = Store<GoBettingState>(
-  goBettingStateReducer,
-  initialState: GoBettingState.initial(),
-);
-
 class GoBettingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final Store<GoBettingState> store = Store<GoBettingState>(
+      goBettingStateReducer,
+      initialState: GoBettingState.initial(),
+    );
+
     return StoreProvider<GoBettingState>(
       store: store,
       child: CupertinoApp(
@@ -28,10 +27,7 @@ class GoBettingApp extends StatelessWidget {
           ),
           child: SafeArea(
             child: StoreConnector<GoBettingState, IncomingMatchesView>(
-              converter: (store) => IncomingMatchesView(
-                store.state.incomingMatches,
-                store.state.unsavedBets,
-              ),
+              converter: (store) => IncomingMatchesView.create(store),
               builder: (_, view) => Column(
                 children: [
                   Expanded(
@@ -42,6 +38,8 @@ class GoBettingApp extends StatelessWidget {
                           match,
                           view.betFor(match.matchId),
                           view.unsavedBets.containsKey(match.matchId),
+                          onScoreChange: (score) => view.onBetChange(match.matchId, score),
+                          onScoreReset: () => view.onResetBet(match.matchId),
                         );
                       },
                       itemCount: view.matches.length,
@@ -57,15 +55,14 @@ class GoBettingApp extends StatelessWidget {
                             Expanded(
                               child: CupertinoButton(
                                 child: Text('Cancel'),
-                                onPressed: () =>
-                                    store.dispatch(ResetBetsAction()),
+                                onPressed: view.onResetBets,
                               ),
                             ),
                             Expanded(
                               child: CupertinoButton.filled(
                                 child: Text('Save'),
-                                onPressed: () => store
-                                    .dispatch(SaveBetsAction(view.unsavedBets)),
+                                onPressed: () =>
+                                    view.onSaveBets(view.unsavedBets),
                               ),
                             ),
                           ],
@@ -86,8 +83,17 @@ class IncomingMatchCardWidget extends StatelessWidget {
   final IncomingMatch _match;
   final MatchScore? _bet;
   final bool _changed;
+  final Function(MatchScore) _onScoreChange;
+  final Function() _onScoreReset;
 
-  IncomingMatchCardWidget(this._match, this._bet, this._changed);
+  IncomingMatchCardWidget(
+    this._match,
+    this._bet,
+    this._changed, {
+    onScoreReset = _onScoreResetNoop,
+    onScoreChange = _onScoreChangeNoop,
+  })  : this._onScoreChange = onScoreChange,
+        this._onScoreReset = onScoreReset;
 
   @override
   Widget build(BuildContext context) {
@@ -104,9 +110,9 @@ class IncomingMatchCardWidget extends StatelessWidget {
             ),
             MatchScoreCounter(_bet, onChange: (score) {
               if (score == _match.bet) {
-                store.dispatch(ResetBetAction(_match.matchId));
+                _onScoreReset();
               } else {
-                store.dispatch(ChangeBetAction(_match.matchId, score));
+                _onScoreChange(score);
               }
             }),
             TeamNameWidget(_match.awayTeamName),
@@ -115,6 +121,9 @@ class IncomingMatchCardWidget extends StatelessWidget {
       ),
     );
   }
+
+  static _onScoreResetNoop() {}
+  static _onScoreChangeNoop(MatchScore _) {}
 }
 
 class TeamNameWidget extends StatelessWidget {
@@ -151,9 +160,10 @@ class MatchScoreCounter extends StatelessWidget {
   int? _awayTeamScore;
   ValueSetter<MatchScore> _onChange;
 
-  MatchScoreCounter(this._score,
-      {ValueSetter<MatchScore> onChange = _onChangeNoop})
-      : this._onChange = onChange,
+  MatchScoreCounter(
+    this._score, {
+    ValueSetter<MatchScore> onChange = _onChangeNoop,
+  })  : this._onChange = onChange,
         this._homeTeamScore = _score?.homeTeam,
         this._awayTeamScore = _score?.awayTeam;
 
