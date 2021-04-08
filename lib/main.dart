@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 
-import './model/match.dart';
+import 'model/match.dart';
 import 'model/state.dart';
 import 'redux/actions.dart';
 import 'redux/reducers.dart';
+import 'view/incoming_matches.dart';
 
 void main() => runApp(GoBettingApp());
 
@@ -26,50 +27,47 @@ class GoBettingApp extends StatelessWidget {
             middle: Text('GoBetting'),
           ),
           child: SafeArea(
-            child: Column(
-              children: [
-                StoreConnector<GoBettingState, List<IncomingMatch>>(
-                  converter: (store) => store.state.incomingMatches,
-                  builder: (_, matches) {
-                    return Expanded(
-                      child: ListView.builder(
-                        itemBuilder: (_, index) =>
-                            IncomingMatchCardWidget(matches[index]),
-                        itemCount: matches.length,
-                      ),
-                    );
-                  },
-                ),
-                StoreConnector<GoBettingState, bool>(
-                  converter: (store) => store.state.unsavedBets.isNotEmpty,
-                  builder: (_, hasUnsavedBets) {
-                    return hasUnsavedBets
-                        ? Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: CupertinoButton(
-                                      child: Text('Cancel'),
-                                      onPressed: () {},
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: CupertinoButton.filled(
-                                      child: Text('Save'),
-                                      onPressed: () {},
-                                    ),
-                                  ),
-                                ],
+            child: StoreConnector<GoBettingState, IncomingMatchesView>(
+              converter: (store) => IncomingMatchesView(
+                store.state.incomingMatches,
+                store.state.unsavedBets,
+              ),
+              builder: (_, view) => Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemBuilder: (_, index) {
+                        final match = view.matches[index];
+                        return IncomingMatchCardWidget(match, view.betFor(match.matchId));
+                      },
+                      itemCount: view.matches.length,
+                    ),
+                  ),
+                  if (view.unsavedBets.isNotEmpty)
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: CupertinoButton(
+                                child: Text('Cancel'),
+                                onPressed: () {},
                               ),
                             ),
-                          )
-                        : SizedBox.shrink();
-                  },
-                ),
-              ],
+                            Expanded(
+                              child: CupertinoButton.filled(
+                                child: Text('Save'),
+                                onPressed: () {},
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -80,8 +78,9 @@ class GoBettingApp extends StatelessWidget {
 
 class IncomingMatchCardWidget extends StatelessWidget {
   final IncomingMatch _match;
+  final MatchScore? _bet;
 
-  IncomingMatchCardWidget(this._match);
+  IncomingMatchCardWidget(this._match, this._bet);
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +95,7 @@ class IncomingMatchCardWidget extends StatelessWidget {
               TextAlign.right,
             ),
             MatchScoreCounter(
-              _match.bet,
+              _bet,
               onChange: (score) =>
                   store.dispatch(ChangeBetAction(_match.matchId, score)),
             ),
