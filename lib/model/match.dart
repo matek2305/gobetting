@@ -6,6 +6,10 @@ class IncomingMatch {
   final MatchScore? bet;
 
   IncomingMatch(this.matchId, this.homeTeamName, this.awayTeamName, this.when, [this.bet]);
+
+  IncomingMatch copyWith({required MatchScore bet}) {
+    return IncomingMatch(matchId, homeTeamName, awayTeamName, when, bet);
+  }
 }
 
 class MatchScore {

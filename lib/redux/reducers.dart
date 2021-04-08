@@ -10,6 +10,13 @@ GoBettingState goBettingStateReducer(GoBettingState state, action) {
 
 List<IncomingMatch> incomingMatchesReducer(
     List<IncomingMatch> matches, action) {
+  if (action is SaveBetsAction) {
+    return matches
+        .map((match) => action.bets.containsKey(match.matchId)
+            ? match.copyWith(bet: action.bets[match.matchId]!)
+            : match)
+        .toList();
+  }
   return matches;
 }
 
@@ -19,6 +26,14 @@ Map<String, MatchScore> unsavedBetsReducer(
     return Map.unmodifiable({}
       ..addAll(bets)
       ..update(action.matchId, (_) => action.bet, ifAbsent: () => action.bet));
+  }
+
+  if (action is SaveBetsAction) {
+    return Map.unmodifiable({});
+  }
+
+  if (action is ResetBetsAction) {
+    return Map.unmodifiable({});
   }
 
   return bets;

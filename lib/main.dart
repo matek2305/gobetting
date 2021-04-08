@@ -53,13 +53,13 @@ class GoBettingApp extends StatelessWidget {
                             Expanded(
                               child: CupertinoButton(
                                 child: Text('Cancel'),
-                                onPressed: () {},
+                                onPressed: () => store.dispatch(ResetBetsAction()),
                               ),
                             ),
                             Expanded(
                               child: CupertinoButton.filled(
                                 child: Text('Save'),
-                                onPressed: () {},
+                                onPressed: () => store.dispatch(SaveBetsAction(view.unsavedBets)),
                               ),
                             ),
                           ],
