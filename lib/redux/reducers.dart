@@ -28,6 +28,12 @@ Map<String, MatchScore> unsavedBetsReducer(
       ..update(action.matchId, (_) => action.bet, ifAbsent: () => action.bet));
   }
 
+  if (action is ResetBetAction) {
+    return Map.unmodifiable({}
+      ..addAll(bets)
+      ..removeWhere((key, _) => key == action.matchId));
+  }
+
   if (action is SaveBetsAction) {
     return Map.unmodifiable({});
   }

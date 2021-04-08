@@ -19,6 +19,17 @@ class MatchScore {
   MatchScore(this.homeTeam, this.awayTeam);
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MatchScore &&
+          runtimeType == other.runtimeType &&
+          homeTeam == other.homeTeam &&
+          awayTeam == other.awayTeam;
+
+  @override
+  int get hashCode => homeTeam.hashCode ^ awayTeam.hashCode;
+
+  @override
   String toString() {
     return 'MatchScore{homeTeam: $homeTeam, awayTeam: $awayTeam}';
   }

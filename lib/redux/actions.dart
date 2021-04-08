@@ -9,6 +9,12 @@ class ChangeBetAction {
 
 class ResetBetsAction {}
 
+class ResetBetAction {
+  final String matchId;
+
+  ResetBetAction(this.matchId);
+}
+
 class SaveBetsAction {
   final Map<String, MatchScore> bets;
 

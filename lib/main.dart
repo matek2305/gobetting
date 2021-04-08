@@ -38,7 +38,11 @@ class GoBettingApp extends StatelessWidget {
                     child: ListView.builder(
                       itemBuilder: (_, index) {
                         final match = view.matches[index];
-                        return IncomingMatchCardWidget(match, view.betFor(match.matchId));
+                        return IncomingMatchCardWidget(
+                          match,
+                          view.betFor(match.matchId),
+                          view.unsavedBets.containsKey(match.matchId),
+                        );
                       },
                       itemCount: view.matches.length,
                     ),
@@ -53,13 +57,15 @@ class GoBettingApp extends StatelessWidget {
                             Expanded(
                               child: CupertinoButton(
                                 child: Text('Cancel'),
-                                onPressed: () => store.dispatch(ResetBetsAction()),
+                                onPressed: () =>
+                                    store.dispatch(ResetBetsAction()),
                               ),
                             ),
                             Expanded(
                               child: CupertinoButton.filled(
                                 child: Text('Save'),
-                                onPressed: () => store.dispatch(SaveBetsAction(view.unsavedBets)),
+                                onPressed: () => store
+                                    .dispatch(SaveBetsAction(view.unsavedBets)),
                               ),
                             ),
                           ],
@@ -79,14 +85,16 @@ class GoBettingApp extends StatelessWidget {
 class IncomingMatchCardWidget extends StatelessWidget {
   final IncomingMatch _match;
   final MatchScore? _bet;
+  final bool _changed;
 
-  IncomingMatchCardWidget(this._match, this._bet);
+  IncomingMatchCardWidget(this._match, this._bet, this._changed);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Card(
+        color: _changed ? Colors.yellow : Colors.white,
         elevation: 8,
         child: Row(
           children: [
@@ -94,11 +102,13 @@ class IncomingMatchCardWidget extends StatelessWidget {
               _match.homeTeamName,
               TextAlign.right,
             ),
-            MatchScoreCounter(
-              _bet,
-              onChange: (score) =>
-                  store.dispatch(ChangeBetAction(_match.matchId, score)),
-            ),
+            MatchScoreCounter(_bet, onChange: (score) {
+              if (score == _match.bet) {
+                store.dispatch(ResetBetAction(_match.matchId));
+              } else {
+                store.dispatch(ChangeBetAction(_match.matchId, score));
+              }
+            }),
             TeamNameWidget(_match.awayTeamName),
           ],
         ),
@@ -120,10 +130,13 @@ class TeamNameWidget extends StatelessWidget {
         children: [
           Flexible(
             fit: FlexFit.tight,
-            child: Text(
-              _teamName,
-              style: TextStyle(fontSize: 18),
-              textAlign: _textAlign,
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                _teamName,
+                style: TextStyle(fontSize: 18),
+                textAlign: _textAlign,
+              ),
             ),
           ),
         ],
