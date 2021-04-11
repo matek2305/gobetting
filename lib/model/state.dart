@@ -1,13 +1,20 @@
+import 'auth.dart';
 import 'match.dart';
 
 class GoBettingState {
+  final AuthState? auth;
   final List<IncomingMatch> incomingMatches;
   final Map<String, MatchScore> unsavedBets;
 
-  GoBettingState({required this.incomingMatches, required this.unsavedBets});
+  GoBettingState({
+    this.auth,
+    required this.incomingMatches,
+    required this.unsavedBets,
+  });
 
   GoBettingState.initial()
-      : incomingMatches = List.unmodifiable(<IncomingMatch>[
+      : auth = null,
+        incomingMatches = List.unmodifiable(<IncomingMatch>[
           IncomingMatch(
             '1',
             'Chelsea',
