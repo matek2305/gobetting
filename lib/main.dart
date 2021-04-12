@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
+import 'package:redux_logging/redux_logging.dart';
+import 'package:redux_thunk/redux_thunk.dart';
 
 import 'model/state.dart';
 import 'redux/reducers.dart';
@@ -15,6 +17,10 @@ class GoBettingApp extends StatelessWidget {
     final Store<GoBettingState> store = Store<GoBettingState>(
       goBettingStateReducer,
       initialState: GoBettingState.initial(),
+      middleware: [
+        thunkMiddleware,
+        new LoggingMiddleware.printer(),
+      ],
     );
 
     return StoreProvider<GoBettingState>(

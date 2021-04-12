@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:gobetting/redux/auth_actions.dart';
 import 'package:redux/redux.dart';
 
 import '../model/state.dart';
@@ -71,7 +72,7 @@ class _AuthView {
 
   factory _AuthView.create(Store<GoBettingState> store) {
     _onLogin(String username, String password) {
-      store.dispatch(LoginRequest(username, password));
+      store.dispatch(login(username, password));
     }
 
     return _AuthView(onLogin: _onLogin);
