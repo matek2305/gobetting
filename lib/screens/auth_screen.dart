@@ -1,11 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:gobetting/redux/auth_actions.dart';
 import 'package:redux/redux.dart';
 
-import '../model/state.dart';
-import '../redux/actions.dart';
+import '../auth/actions.dart';
+import '../redux.dart';
 
 class AuthScreen extends StatefulWidget {
   @override

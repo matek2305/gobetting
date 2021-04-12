@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 
-import '../model/match.dart';
-import '../model/state.dart';
-import '../redux/actions.dart';
+import '../bets/actions.dart';
+import '../bets/model.dart';
+import '../redux.dart';
 
 class IncomingMatchesScreen extends StatelessWidget {
   @override

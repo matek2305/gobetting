@@ -1,5 +1,7 @@
-import 'auth.dart';
-import 'match.dart';
+import 'auth/model.dart';
+import 'auth/reducers.dart';
+import 'bets/model.dart';
+import 'bets/reducers.dart';
 
 class GoBettingState {
   final AuthState auth;
@@ -17,4 +19,11 @@ class GoBettingState {
         incomingMatches: List.unmodifiable([]),
         unsavedBets: Map.unmodifiable({}),
       );
+}
+
+GoBettingState goBettingStateReducer(GoBettingState state, action) {
+  return GoBettingState(
+      auth: authReducer(state.auth, action),
+      incomingMatches: incomingMatchesReducer(state.incomingMatches, action),
+      unsavedBets: unsavedBetsReducer(state.unsavedBets, action));
 }

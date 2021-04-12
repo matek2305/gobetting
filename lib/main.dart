@@ -5,9 +5,8 @@ import 'package:redux/redux.dart';
 import 'package:redux_logging/redux_logging.dart';
 import 'package:redux_thunk/redux_thunk.dart';
 
-import 'model/state.dart';
-import 'redux/reducers.dart';
 import 'screens/auth_screen.dart';
+import 'redux.dart';
 
 void main() => runApp(GoBettingApp());
 

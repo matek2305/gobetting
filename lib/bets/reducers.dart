@@ -1,18 +1,9 @@
-import 'package:gobetting/redux/auth_reducer.dart';
 import 'package:redux/redux.dart';
 
-import '../model/match.dart';
-import '../model/state.dart';
 import 'actions.dart';
+import 'model.dart';
 
-GoBettingState goBettingStateReducer(GoBettingState state, action) {
-  return GoBettingState(
-      auth: authReducer(state.auth, action),
-      incomingMatches: _incomingMatchesReducer(state.incomingMatches, action),
-      unsavedBets: _unsavedBetsReducer(state.unsavedBets, action));
-}
-
-final _incomingMatchesReducer = combineReducers<List<IncomingMatch>>([
+final incomingMatchesReducer = combineReducers<List<IncomingMatch>>([
   TypedReducer<List<IncomingMatch>, SaveBetsAction>(_saveBets),
 ]);
 
@@ -27,7 +18,7 @@ List<IncomingMatch> _saveBets(
       .toList();
 }
 
-final _unsavedBetsReducer = combineReducers<Map<String, MatchScore>>([
+final unsavedBetsReducer = combineReducers<Map<String, MatchScore>>([
   TypedReducer<Map<String, MatchScore>, ChangeBetAction>(_changeBet),
   TypedReducer<Map<String, MatchScore>, ResetBetAction>(_resetBet),
   TypedReducer<Map<String, MatchScore>, ResetBetsAction>(_resetAllBets),
