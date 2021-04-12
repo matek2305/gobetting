@@ -5,12 +5,16 @@ import 'package:redux/redux.dart';
 import 'package:redux_logging/redux_logging.dart';
 import 'package:redux_thunk/redux_thunk.dart';
 
-import 'screens/auth_screen.dart';
+import 'navigation/middleware.dart';
 import 'redux.dart';
+import 'screens/auth_screen.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
 void main() => runApp(GoBettingApp());
 
 class GoBettingApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     final Store<GoBettingState> store = Store<GoBettingState>(
@@ -18,6 +22,7 @@ class GoBettingApp extends StatelessWidget {
       initialState: GoBettingState.initial(),
       middleware: [
         thunkMiddleware,
+        ...NavigationMiddleware(navigatorKey).getMiddlewares(),
         new LoggingMiddleware.printer(),
       ],
     );
@@ -25,6 +30,7 @@ class GoBettingApp extends StatelessWidget {
     return StoreProvider<GoBettingState>(
       store: store,
       child: CupertinoApp(
+        navigatorKey: navigatorKey,
         home: AuthScreen(),
       ),
     );

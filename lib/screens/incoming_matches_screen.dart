@@ -19,7 +19,8 @@ class IncomingMatchesScreen extends StatelessWidget {
           converter: (store) => _IncomingMatchesView.create(store),
           builder: (_, view) => Column(
             children: [
-              Expanded(
+              if (view.matches.isEmpty) Text("Currently there are no incoming matches"),
+              if (view.matches.isNotEmpty) Expanded(
                 child: ListView.builder(
                   itemBuilder: (_, index) {
                     final match = view.matches[index];
