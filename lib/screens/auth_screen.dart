@@ -32,6 +32,14 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  if (view.hasError)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        view.error,
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
                   CupertinoTextField(
                     placeholder: "Username",
                     controller: _usernameController,
@@ -65,15 +73,25 @@ class _AuthScreenState extends State<AuthScreen> {
 }
 
 class _AuthView {
+  final bool hasError;
+  final dynamic error;
   final Function(String, String) onLogin;
 
-  _AuthView({required this.onLogin});
+  _AuthView({
+    required this.hasError,
+    required this.error,
+    required this.onLogin,
+  });
 
   factory _AuthView.create(Store<GoBettingState> store) {
     _onLogin(String username, String password) {
       store.dispatch(login(username, password));
     }
 
-    return _AuthView(onLogin: _onLogin);
+    return _AuthView(
+      hasError: store.state.auth.error != null,
+      error: store.state.auth.error,
+      onLogin: _onLogin,
+    );
   }
 }

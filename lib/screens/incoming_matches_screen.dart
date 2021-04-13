@@ -19,23 +19,25 @@ class IncomingMatchesScreen extends StatelessWidget {
           converter: (store) => _IncomingMatchesView.create(store),
           builder: (_, view) => Column(
             children: [
-              if (view.matches.isEmpty) Text("Currently there are no incoming matches"),
-              if (view.matches.isNotEmpty) Expanded(
-                child: ListView.builder(
-                  itemBuilder: (_, index) {
-                    final match = view.matches[index];
-                    return IncomingMatchCardWidget(
-                      match,
-                      view.betFor(match.matchId),
-                      view.unsavedBets.containsKey(match.matchId),
-                      onScoreChange: (score) =>
-                          view.onBetChange(match.matchId, score),
-                      onScoreReset: () => view.onResetBet(match.matchId),
-                    );
-                  },
-                  itemCount: view.matches.length,
+              if (view.matches.isEmpty)
+                Text("Currently there are no incoming matches"),
+              if (view.matches.isNotEmpty)
+                Expanded(
+                  child: ListView.builder(
+                    itemBuilder: (_, index) {
+                      final match = view.matches[index];
+                      return IncomingMatchCardWidget(
+                        match,
+                        view.betFor(match.matchId),
+                        view.unsavedBets.containsKey(match.matchId),
+                        onScoreChange: (score) =>
+                            view.onBetChange(match.matchId, score),
+                        onScoreReset: () => view.onResetBet(match.matchId),
+                      );
+                    },
+                    itemCount: view.matches.length,
+                  ),
                 ),
-              ),
               if (view.unsavedBets.isNotEmpty)
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -75,12 +77,12 @@ class IncomingMatchCardWidget extends StatelessWidget {
   final Function() _onScoreReset;
 
   IncomingMatchCardWidget(
-      this._match,
-      this._bet,
-      this._changed, {
-        onScoreReset = _onScoreResetNoop,
-        onScoreChange = _onScoreChangeNoop,
-      })  : this._onScoreChange = onScoreChange,
+    this._match,
+    this._bet,
+    this._changed, {
+    onScoreReset = _onScoreResetNoop,
+    onScoreChange = _onScoreChangeNoop,
+  })  : this._onScoreChange = onScoreChange,
         this._onScoreReset = onScoreReset;
 
   @override
@@ -144,15 +146,16 @@ class TeamNameWidget extends StatelessWidget {
 }
 
 class MatchScoreCounter extends StatelessWidget {
-  MatchScore? _score;
+  final MatchScore? _score;
+  final ValueSetter<MatchScore> _onChange;
+
   int? _homeTeamScore;
   int? _awayTeamScore;
-  ValueSetter<MatchScore> _onChange;
 
   MatchScoreCounter(
-      this._score, {
-        ValueSetter<MatchScore> onChange = _onChangeNoop,
-      })  : this._onChange = onChange,
+    this._score, {
+    ValueSetter<MatchScore> onChange = _onChangeNoop,
+  })  : this._onChange = onChange,
         this._homeTeamScore = _score?.homeTeam,
         this._awayTeamScore = _score?.awayTeam;
 
@@ -195,8 +198,8 @@ class MatchScoreCounter extends StatelessWidget {
 }
 
 class GoalsCounterWidget extends StatefulWidget {
+  final ValueSetter<int> _onChange;
   int? _goals;
-  ValueSetter<int> _onChange;
 
   GoalsCounterWidget(this._goals, {ValueSetter<int> onChange = _onChangeNoop})
       : this._onChange = onChange;
@@ -218,7 +221,7 @@ class _GoalsCounterWidgetState extends State<GoalsCounterWidget> {
           icon: Icon(Icons.keyboard_arrow_up_rounded),
           onPressed: () {
             setState(() =>
-            widget._goals = widget._goals != null ? widget._goals! + 1 : 0);
+                widget._goals = widget._goals != null ? widget._goals! + 1 : 0);
             widget._onChange(widget._goals!);
           },
         ),
@@ -235,9 +238,9 @@ class _GoalsCounterWidgetState extends State<GoalsCounterWidget> {
           icon: Icon(Icons.keyboard_arrow_down_rounded),
           onPressed: (widget._goals ?? 0) > 0
               ? () {
-            setState(() => widget._goals = widget._goals! - 1);
-            widget._onChange(widget._goals!);
-          }
+                  setState(() => widget._goals = widget._goals! - 1);
+                  widget._onChange(widget._goals!);
+                }
               : null,
         ),
       ],
