@@ -4,7 +4,8 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 
 import '../bets/actions.dart';
-import '../bets/model.dart';
+import '../matches/actions.dart';
+import '../matches/model.dart';
 import '../redux.dart';
 
 class IncomingMatchesScreen extends StatelessWidget {
@@ -16,10 +17,17 @@ class IncomingMatchesScreen extends StatelessWidget {
       ),
       child: SafeArea(
         child: StoreConnector<GoBettingState, _IncomingMatchesView>(
+          onInit: (store) => store.dispatch(fetchIncomingMatches()),
           converter: (store) => _IncomingMatchesView.create(store),
           builder: (_, view) => Column(
             children: [
-              if (view.matches.isEmpty)
+              if (view.hasError)
+                Text(
+                  view.error,
+                  style: TextStyle(color: Colors.red),
+                ),
+              if (view.isLoading) Text("loading ..."),
+              if (view.noMatchesAvailable)
                 Text("Currently there are no incoming matches"),
               if (view.matches.isNotEmpty)
                 Expanded(
@@ -255,6 +263,11 @@ class _IncomingMatchesView {
   final Function(Map<String, MatchScore>) onSaveBets;
   final Function(String) onResetBet;
   final Function() onResetBets;
+  final bool isLoading;
+  final bool hasError;
+  final dynamic error;
+
+  bool get noMatchesAvailable => matches.isEmpty && !isLoading;
 
   Map<String, IncomingMatch> get _matchesById {
     return Map.fromIterable(matches, key: (match) => match.matchId);
@@ -267,6 +280,9 @@ class _IncomingMatchesView {
     required this.onSaveBets,
     required this.onResetBet,
     required this.onResetBets,
+    required this.isLoading,
+    required this.hasError,
+    required this.error,
   });
 
   MatchScore? betFor(String matchId) {
@@ -291,12 +307,15 @@ class _IncomingMatchesView {
     }
 
     return _IncomingMatchesView(
-      matches: store.state.incomingMatches,
-      unsavedBets: store.state.unsavedBets,
+      matches: store.state.incomingMatches.incomingMatches,
+      unsavedBets: store.state.incomingMatches.unsavedBets,
       onBetChange: _onBetChange,
       onSaveBets: _onSaveBets,
       onResetBet: _onResetBet,
       onResetBets: _onResetBets,
+      isLoading: store.state.incomingMatches.loading,
+      hasError: store.state.incomingMatches.error != null,
+      error: store.state.incomingMatches.error,
     );
   }
 }

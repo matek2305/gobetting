@@ -1,9 +1,9 @@
 class AuthState {
-  dynamic error;
-  bool loading;
-  bool loggedIn;
-  String? token;
-  String? refreshToken;
+  final dynamic error;
+  final bool loading;
+  final bool loggedIn;
+  final String? token;
+  final String? refreshToken;
 
   AuthState({
     required this.error,

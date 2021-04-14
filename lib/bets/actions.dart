@@ -1,4 +1,4 @@
-import 'model.dart';
+import '../matches/model.dart';
 
 class ChangeBetAction {
   final String matchId;
