@@ -264,8 +264,9 @@ class _IncomingMatchesView {
   final Function(String) onResetBet;
   final Function() onResetBets;
   final bool isLoading;
-  final bool hasError;
   final dynamic error;
+
+  bool get hasError => error != null;
 
   bool get noMatchesAvailable => matches.isEmpty && !isLoading;
 
@@ -281,7 +282,6 @@ class _IncomingMatchesView {
     required this.onResetBet,
     required this.onResetBets,
     required this.isLoading,
-    required this.hasError,
     required this.error,
   });
 
@@ -314,7 +314,6 @@ class _IncomingMatchesView {
       onResetBet: _onResetBet,
       onResetBets: _onResetBets,
       isLoading: store.state.incomingMatches.loading,
-      hasError: store.state.incomingMatches.error != null,
       error: store.state.incomingMatches.error,
     );
   }

@@ -40,6 +40,11 @@ class _AuthScreenState extends State<AuthScreen> {
                         style: TextStyle(color: Colors.red),
                       ),
                     ),
+                  if (view.isLoading)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("LOGGING IN ..."),
+                    ),
                   CupertinoTextField(
                     placeholder: "Username",
                     controller: _usernameController,
@@ -56,10 +61,12 @@ class _AuthScreenState extends State<AuthScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: CupertinoButton.filled(
                       child: Text("LOGIN"),
-                      onPressed: () => view.onLogin(
-                        _usernameController.value.text,
-                        _passwordController.value.text,
-                      ),
+                      onPressed: view.isLoading
+                          ? null
+                          : () => view.onLogin(
+                                _usernameController.value.text,
+                                _passwordController.value.text,
+                              ),
                     ),
                   )
                 ],
@@ -73,13 +80,15 @@ class _AuthScreenState extends State<AuthScreen> {
 }
 
 class _AuthView {
-  final bool hasError;
   final dynamic error;
+  final bool isLoading;
   final Function(String, String) onLogin;
 
+  bool get hasError => error != null;
+
   _AuthView({
-    required this.hasError,
     required this.error,
+    required this.isLoading,
     required this.onLogin,
   });
 
@@ -89,8 +98,8 @@ class _AuthView {
     }
 
     return _AuthView(
-      hasError: store.state.auth.error != null,
       error: store.state.auth.error,
+      isLoading: store.state.auth.loading,
       onLogin: _onLogin,
     );
   }
