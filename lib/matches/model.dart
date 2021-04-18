@@ -1,33 +1,28 @@
 class IncomingMatchesState {
   final dynamic error;
   final bool loading;
-  final List<IncomingMatch> incomingMatches;
-  final Map<String, MatchScore> unsavedBets;
+  final List<IncomingMatch> data;
 
   IncomingMatchesState({
     this.error,
     required this.loading,
-    required this.incomingMatches,
-    required this.unsavedBets,
+    required this.data,
   });
 
   factory IncomingMatchesState.initial() => IncomingMatchesState(
         loading: false,
-        incomingMatches: [],
-        unsavedBets: {},
+        data: [],
       );
 
   IncomingMatchesState copyWith({
     dynamic error,
     bool? loading,
-    List<IncomingMatch>? incomingMatches,
-    Map<String, MatchScore>? unsavedBets,
+    List<IncomingMatch>? data,
   }) {
     return IncomingMatchesState(
       error: error ?? this.error,
       loading: loading ?? this.loading,
-      incomingMatches: incomingMatches ?? this.incomingMatches,
-      unsavedBets: unsavedBets ?? this.unsavedBets,
+      data: data ?? this.data,
     );
   }
 }
@@ -67,9 +62,9 @@ class MatchScore {
   MatchScore(this.homeTeam, this.awayTeam);
 
   factory MatchScore.fromJson(Map<String, dynamic> json) => MatchScore(
-    json["homeTeam"],
-    json["awayTeam"],
-  );
+        json["homeTeam"],
+        json["awayTeam"],
+      );
 
   @override
   bool operator ==(Object other) =>

@@ -11,10 +11,7 @@ final incomingMatchesReducer = combineReducers<IncomingMatchesState>([
       _onFetchSuccess),
   TypedReducer<IncomingMatchesState, FetchIncomingMatchesFailure>(
       _onFetchFailure),
-  TypedReducer<IncomingMatchesState, SaveBetsAction>(_saveBets),
-  TypedReducer<IncomingMatchesState, ChangeBetAction>(_changeBet),
-  TypedReducer<IncomingMatchesState, ResetBetAction>(_resetBet),
-  TypedReducer<IncomingMatchesState, ResetBetsAction>(_resetAllBets),
+  TypedReducer<IncomingMatchesState, SaveBetsSuccess>(_onSaveBetsSuccess),
 ]);
 
 IncomingMatchesState _onFetchRequest(
@@ -31,8 +28,7 @@ IncomingMatchesState _onFetchSuccess(
   return state.copyWith(
     loading: false,
     error: null,
-    incomingMatches: action.matches,
-    unsavedBets: {},
+    data: action.matches,
   );
 }
 
@@ -43,35 +39,14 @@ IncomingMatchesState _onFetchFailure(
   return state.copyWith(loading: false, error: action.error);
 }
 
-IncomingMatchesState _saveBets(
+IncomingMatchesState _onSaveBetsSuccess(
   IncomingMatchesState state,
-  SaveBetsAction action,
+  SaveBetsSuccess action,
 ) {
-  final incomingMatches = state.incomingMatches
+  final incomingMatches = state.data
       .map((match) => action.bets.containsKey(match.matchId)
           ? match.copyWith(bet: action.bets[match.matchId]!)
           : match)
       .toList();
-  return state.copyWith(incomingMatches: incomingMatches, unsavedBets: {});
-}
-
-IncomingMatchesState _changeBet(
-    IncomingMatchesState state, ChangeBetAction action) {
-  final bets = Map<String, MatchScore>.unmodifiable({}
-    ..addAll(state.unsavedBets)
-    ..update(action.matchId, (_) => action.bet, ifAbsent: () => action.bet));
-  return state.copyWith(unsavedBets: bets);
-}
-
-IncomingMatchesState _resetBet(
-    IncomingMatchesState state, ResetBetAction action) {
-  final bets = Map<String, MatchScore>.unmodifiable({}
-    ..addAll(state.unsavedBets)
-    ..removeWhere((key, _) => key == action.matchId));
-  return state.copyWith(unsavedBets: bets);
-}
-
-IncomingMatchesState _resetAllBets(
-    IncomingMatchesState state, ResetBetsAction action) {
-  return state.copyWith(unsavedBets: {});
+  return state.copyWith(data: incomingMatches);
 }

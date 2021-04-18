@@ -26,7 +26,7 @@ class IncomingMatchesScreen extends StatelessWidget {
                   view.error,
                   style: TextStyle(color: Colors.red),
                 ),
-              if (view.isLoading) Text("loading ..."),
+              if (view.isFetching) Text("loading ..."),
               if (view.noMatchesAvailable)
                 Text("Currently there are no incoming matches"),
               if (view.matches.isNotEmpty)
@@ -56,13 +56,16 @@ class IncomingMatchesScreen extends StatelessWidget {
                         Expanded(
                           child: CupertinoButton(
                             child: Text('Cancel'),
-                            onPressed: view.onResetBets,
+                            onPressed:
+                                view.isSavingBets ? null : view.onResetBets,
                           ),
                         ),
                         Expanded(
                           child: CupertinoButton.filled(
-                            child: Text('Save'),
-                            onPressed: () => view.onSaveBets(view.unsavedBets),
+                            child:
+                                Text(view.isSavingBets ? 'Saving ...' : 'Save'),
+                            onPressed:
+                                view.isSavingBets ? null : view.onSaveBets,
                           ),
                         ),
                       ],
@@ -260,15 +263,16 @@ class _IncomingMatchesView {
   final List<IncomingMatch> matches;
   final Map<String, MatchScore> unsavedBets;
   final Function(String, MatchScore) onBetChange;
-  final Function(Map<String, MatchScore>) onSaveBets;
+  final Function() onSaveBets;
   final Function(String) onResetBet;
   final Function() onResetBets;
-  final bool isLoading;
+  final bool isFetching;
+  final bool isSavingBets;
   final dynamic error;
 
   bool get hasError => error != null;
 
-  bool get noMatchesAvailable => matches.isEmpty && !isLoading;
+  bool get noMatchesAvailable => matches.isEmpty && !isFetching;
 
   Map<String, IncomingMatch> get _matchesById {
     return Map.fromIterable(matches, key: (match) => match.matchId);
@@ -281,7 +285,8 @@ class _IncomingMatchesView {
     required this.onSaveBets,
     required this.onResetBet,
     required this.onResetBets,
-    required this.isLoading,
+    required this.isFetching,
+    required this.isSavingBets,
     required this.error,
   });
 
@@ -294,8 +299,8 @@ class _IncomingMatchesView {
       store.dispatch(ChangeBetAction(matchId, bet));
     }
 
-    _onSaveBets(Map<String, MatchScore> bets) {
-      store.dispatch(SaveBetsAction(bets));
+    _onSaveBets() {
+      store.dispatch(saveBets());
     }
 
     _onResetBet(String matchId) {
@@ -307,14 +312,15 @@ class _IncomingMatchesView {
     }
 
     return _IncomingMatchesView(
-      matches: store.state.incomingMatches.incomingMatches,
-      unsavedBets: store.state.incomingMatches.unsavedBets,
+      matches: store.state.incomingMatches.data,
+      unsavedBets: store.state.unsavedBets.data,
       onBetChange: _onBetChange,
       onSaveBets: _onSaveBets,
       onResetBet: _onResetBet,
       onResetBets: _onResetBets,
-      isLoading: store.state.incomingMatches.loading,
-      error: store.state.incomingMatches.error,
+      isFetching: store.state.incomingMatches.loading,
+      isSavingBets: store.state.unsavedBets.saving,
+      error: store.state.incomingMatches.error ?? store.state.unsavedBets.error,
     );
   }
 }
