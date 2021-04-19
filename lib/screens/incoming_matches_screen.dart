@@ -26,24 +26,34 @@ class IncomingMatchesScreen extends StatelessWidget {
                   view.error,
                   style: TextStyle(color: Colors.red),
                 ),
-              if (view.isFetching) Text("loading ..."),
+              if (view.isFetching && view.matches.isEmpty) Text("loading ..."),
               if (view.noMatchesAvailable)
                 Text("Currently there are no incoming matches"),
               if (view.matches.isNotEmpty)
                 Expanded(
-                  child: ListView.builder(
-                    itemBuilder: (_, index) {
-                      final match = view.matches[index];
-                      return IncomingMatchCardWidget(
-                        match,
-                        view.betFor(match.matchId),
-                        view.unsavedBets.containsKey(match.matchId),
-                        onScoreChange: (score) =>
-                            view.onBetChange(match.matchId, score),
-                        onScoreReset: () => view.onResetBet(match.matchId),
-                      );
-                    },
-                    itemCount: view.matches.length,
+                  child: CustomScrollView(
+                    slivers: [
+                      CupertinoSliverRefreshControl(
+                        onRefresh: () => Future.value(view.onRefresh()),
+                      ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (_, index) {
+                            final match = view.matches[index];
+                            return IncomingMatchCardWidget(
+                              match,
+                              view.betFor(match.matchId),
+                              view.unsavedBets.containsKey(match.matchId),
+                              onScoreChange: (score) =>
+                                  view.onBetChange(match.matchId, score),
+                              onScoreReset: () =>
+                                  view.onResetBet(match.matchId),
+                            );
+                          },
+                          childCount: view.matches.length,
+                        ),
+                      )
+                    ],
                   ),
                 ),
               if (view.unsavedBets.isNotEmpty)
@@ -266,6 +276,7 @@ class _IncomingMatchesView {
   final Function() onSaveBets;
   final Function(String) onResetBet;
   final Function() onResetBets;
+  final Function() onRefresh;
   final bool isFetching;
   final bool isSavingBets;
   final dynamic error;
@@ -285,6 +296,7 @@ class _IncomingMatchesView {
     required this.onSaveBets,
     required this.onResetBet,
     required this.onResetBets,
+    required this.onRefresh,
     required this.isFetching,
     required this.isSavingBets,
     required this.error,
@@ -311,6 +323,10 @@ class _IncomingMatchesView {
       store.dispatch(ResetBetsAction());
     }
 
+    _onRefresh() {
+      store.dispatch(fetchIncomingMatches());
+    }
+
     return _IncomingMatchesView(
       matches: store.state.incomingMatches.data,
       unsavedBets: store.state.unsavedBets.data,
@@ -318,6 +334,7 @@ class _IncomingMatchesView {
       onSaveBets: _onSaveBets,
       onResetBet: _onResetBet,
       onResetBets: _onResetBets,
+      onRefresh: _onRefresh,
       isFetching: store.state.incomingMatches.loading,
       isSavingBets: store.state.unsavedBets.saving,
       error: store.state.incomingMatches.error ?? store.state.unsavedBets.error,
