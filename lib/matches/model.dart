@@ -47,12 +47,15 @@ class IncomingMatch {
         json["homeTeamName"],
         json["awayTeamName"],
         DateTime.parse(json["when"]),
-        json["bet"] != null ? MatchScore.fromJson(json["bet"]) : null,
+        _hasBets(json) ? MatchScore.fromJson(json["bets"][0]) : null,
       );
 
   IncomingMatch copyWith({required MatchScore bet}) {
     return IncomingMatch(matchId, homeTeamName, awayTeamName, when, bet);
   }
+
+  static bool _hasBets(Map<String, dynamic> json) =>
+      json["bets"] != null && (json["bets"] as List).isNotEmpty;
 }
 
 class MatchScore {
