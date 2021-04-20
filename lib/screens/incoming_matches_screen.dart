@@ -11,80 +11,69 @@ import '../redux.dart';
 class IncomingMatchesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text('GoBetting'),
-      ),
-      child: SafeArea(
-        child: StoreConnector<GoBettingState, _IncomingMatchesView>(
-          onInit: (store) => store.dispatch(fetchIncomingMatches()),
-          converter: (store) => _IncomingMatchesView.create(store),
-          builder: (_, view) => Column(
-            children: [
-              if (view.hasError)
-                Text(
-                  view.error,
-                  style: TextStyle(color: Colors.red),
-                ),
-              if (view.isFetching && view.matches.isEmpty) Text("loading ..."),
-              if (view.noMatchesAvailable)
-                Text("Currently there are no incoming matches"),
-              if (view.matches.isNotEmpty)
-                Expanded(
-                  child: CustomScrollView(
-                    slivers: [
-                      CupertinoSliverRefreshControl(
-                        onRefresh: () => Future.value(view.onRefresh()),
-                      ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (_, index) {
-                            final match = view.matches[index];
-                            return IncomingMatchCardWidget(
-                              match,
-                              view.betFor(match.matchId),
-                              view.unsavedBets.containsKey(match.matchId),
-                              onScoreChange: (score) =>
-                                  view.onBetChange(match.matchId, score),
-                              onScoreReset: () =>
-                                  view.onResetBet(match.matchId),
-                            );
-                          },
-                          childCount: view.matches.length,
-                        ),
-                      )
-                    ],
+    return StoreConnector<GoBettingState, _IncomingMatchesView>(
+      onInit: (store) => store.dispatch(fetchIncomingMatches()),
+      converter: (store) => _IncomingMatchesView.create(store),
+      builder: (_, view) => Column(
+        children: [
+          if (view.hasError)
+            Text(
+              view.error,
+              style: TextStyle(color: Colors.red),
+            ),
+          if (view.isFetching && view.matches.isEmpty) Text("loading ..."),
+          if (view.noMatchesAvailable)
+            Text("Currently there are no incoming matches"),
+          if (view.matches.isNotEmpty)
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  CupertinoSliverRefreshControl(
+                    onRefresh: () => Future.value(view.onRefresh()),
                   ),
-                ),
-              if (view.unsavedBets.isNotEmpty)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: CupertinoButton(
-                            child: Text('Cancel'),
-                            onPressed:
-                                view.isSavingBets ? null : view.onResetBets,
-                          ),
-                        ),
-                        Expanded(
-                          child: CupertinoButton.filled(
-                            child:
-                                Text(view.isSavingBets ? 'Saving ...' : 'Save'),
-                            onPressed:
-                                view.isSavingBets ? null : view.onSaveBets,
-                          ),
-                        ),
-                      ],
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, index) {
+                        final match = view.matches[index];
+                        return IncomingMatchCardWidget(
+                          match,
+                          view.betFor(match.matchId),
+                          view.unsavedBets.containsKey(match.matchId),
+                          onScoreChange: (score) =>
+                              view.onBetChange(match.matchId, score),
+                          onScoreReset: () => view.onResetBet(match.matchId),
+                        );
+                      },
+                      childCount: view.matches.length,
                     ),
-                  ),
+                  )
+                ],
+              ),
+            ),
+          if (view.unsavedBets.isNotEmpty)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: CupertinoButton(
+                        child: Text('Cancel'),
+                        onPressed: view.isSavingBets ? null : view.onResetBets,
+                      ),
+                    ),
+                    Expanded(
+                      child: CupertinoButton.filled(
+                        child: Text(view.isSavingBets ? 'Saving ...' : 'Save'),
+                        onPressed: view.isSavingBets ? null : view.onSaveBets,
+                      ),
+                    ),
+                  ],
                 ),
-            ],
-          ),
-        ),
+              ),
+            ),
+        ],
       ),
     );
   }

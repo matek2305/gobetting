@@ -4,7 +4,7 @@ import 'package:redux/redux.dart';
 
 import '../redux.dart';
 import '../screens/auth_screen.dart';
-import '../screens/incoming_matches_screen.dart';
+import '../screens/dashboard_screen.dart';
 import 'actions.dart';
 import 'destinations.dart';
 
@@ -53,7 +53,7 @@ class NavigationMiddleware {
   Widget _convert(Destination input) {
     switch (input) {
       case Destination.HOME:
-        return IncomingMatchesScreen();
+        return DashboardScreen();
       case Destination.LOGIN:
         return AuthScreen();
       default: return AuthScreen();
