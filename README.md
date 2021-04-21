@@ -1,7 +1,7 @@
 # gobetting
+[![test](https://badgen.net/badge/night%20build/android%20apk/blue)](https://nightly.link/matek2305/gobetting/workflows/flutter/main/gobetting.apk.zip)
 
 GoBetting mobile app.  
-[![test](https://badgen.net/badge/night%20build/android%20apk/blue)](https://nightly.link/matek2305/gobetting/workflows/flutter/main/gobetting.apk.zip)
 
 ## Getting Started
 
