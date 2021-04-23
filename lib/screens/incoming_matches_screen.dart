@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:intl/intl.dart';
 import 'package:redux/redux.dart';
 
 import '../bets/actions.dart';
@@ -34,17 +36,15 @@ class IncomingMatchesScreen extends StatelessWidget {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (_, index) {
-                        final match = view.matches[index];
-                        return IncomingMatchCardWidget(
-                          match,
-                          view.betFor(match.matchId),
-                          view.unsavedBets.containsKey(match.matchId),
-                          onScoreChange: (score) =>
-                              view.onBetChange(match.matchId, score),
-                          onScoreReset: () => view.onResetBet(match.matchId),
+                        final entry =
+                            view.matchesGroupedByDate.entries.toList()[index];
+                        return MatchesByDayGroupWidget(
+                          entry.key,
+                          entry.value,
+                          view,
                         );
                       },
-                      childCount: view.matches.length,
+                      childCount: view.matchesGroupedByDate.length,
                     ),
                   )
                 ],
@@ -79,6 +79,47 @@ class IncomingMatchesScreen extends StatelessWidget {
   }
 }
 
+class MatchesByDayGroupWidget extends StatelessWidget {
+  final DateTime _day;
+  final List<IncomingMatch> _matches;
+  final _IncomingMatchesView _view;
+
+  const MatchesByDayGroupWidget(
+    this._day,
+    this._matches,
+    this._view,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final today = new DateTime(now.year, now.month, now.day);
+    final tomorrow = new DateTime(now.year, now.month, now.day + 1);
+
+    var label = Text(DateFormat.MMMEd().format(_day));
+    if (_day == today) {
+      label = Text("Today");
+    } else if (_day == tomorrow) {
+      label = Text("Tomorrow");
+    }
+
+    return Column(
+      children: [
+        label,
+        ..._matches.map(
+          (match) => IncomingMatchCardWidget(
+            match,
+            _view.betFor(match.matchId),
+            _view.unsavedBets.containsKey(match.matchId),
+            onScoreChange: (score) => _view.onBetChange(match.matchId, score),
+            onScoreReset: () => _view.onResetBet(match.matchId),
+          ),
+        )
+      ],
+    );
+  }
+}
+
 class IncomingMatchCardWidget extends StatelessWidget {
   final IncomingMatch _match;
   final MatchScore? _bet;
@@ -97,27 +138,31 @@ class IncomingMatchCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(6.0),
-      child: Card(
-        color: _changed ? Colors.yellow : Colors.white,
-        elevation: 8,
-        child: Row(
-          children: [
-            TeamNameWidget(
-              _match.homeTeamName,
-              TextAlign.right,
+    return Card(
+      color: _changed ? Colors.yellow : Colors.white,
+      elevation: 8,
+      child: Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(DateFormat.Hm().format(_match.when)),
             ),
-            MatchScoreCounter(_bet, onChange: (score) {
-              if (score == _match.bet) {
-                _onScoreReset();
-              } else {
-                _onScoreChange(score);
-              }
-            }),
-            TeamNameWidget(_match.awayTeamName),
-          ],
-        ),
+          ),
+          TeamNameWidget(
+            _match.homeTeamName,
+            TextAlign.right,
+          ),
+          MatchScoreCounter(_bet, onChange: (score) {
+            if (score == _match.bet) {
+              _onScoreReset();
+            } else {
+              _onScoreChange(score);
+            }
+          }),
+          TeamNameWidget(_match.awayTeamName),
+          Spacer(),
+        ],
       ),
     );
   }
@@ -140,13 +185,10 @@ class TeamNameWidget extends StatelessWidget {
         children: [
           Flexible(
             fit: FlexFit.tight,
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Text(
-                _teamName,
-                style: TextStyle(fontSize: 18),
-                textAlign: _textAlign,
-              ),
+            child: Text(
+              _teamName,
+              style: TextStyle(fontSize: 16),
+              textAlign: _textAlign,
             ),
           ),
         ],
@@ -273,6 +315,17 @@ class _IncomingMatchesView {
   bool get hasError => error != null;
 
   bool get noMatchesAvailable => matches.isEmpty && !isFetching;
+
+  Map<DateTime, List<IncomingMatch>> get matchesGroupedByDate {
+    return groupBy(
+      matches,
+      (match) => new DateTime(
+        match.when.year,
+        match.when.month,
+        match.when.day,
+      ),
+    );
+  }
 
   Map<String, IncomingMatch> get _matchesById {
     return Map.fromIterable(matches, key: (match) => match.matchId);

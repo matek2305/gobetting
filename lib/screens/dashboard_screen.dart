@@ -36,7 +36,13 @@ class DashboardScreen extends StatelessWidget {
             middle: Text('GoBetting'),
           ),
           child: SafeArea(
-            child: _contentMap[index]!(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 8.0,
+                horizontal: 8.0,
+              ),
+              child: _contentMap[index]!(),
+            ),
           ),
         );
       },

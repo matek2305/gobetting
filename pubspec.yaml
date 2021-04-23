@@ -28,6 +28,8 @@ dependencies:
   redux_logging: ^0.5.0
   redux_thunk: ^0.4.0
   http: ^0.13.1
+  collection: ^1.15.0
+  intl: ^0.17.0
 
 
   # The following adds the Cupertino Icons font to your application.
