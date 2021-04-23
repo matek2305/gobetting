@@ -46,7 +46,7 @@ class IncomingMatch {
         json["matchId"],
         json["homeTeamName"],
         json["awayTeamName"],
-        DateTime.parse(json["when"]),
+        DateTime.parse(json["when"]).toLocal(),
         _hasBets(json) ? MatchScore.fromJson(json["bets"][0]) : null,
       );
 

@@ -145,7 +145,7 @@ class IncomingMatchCardWidget extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.all(6.0),
               child: Text(DateFormat.Hm().format(_match.when)),
             ),
           ),
