@@ -96,7 +96,7 @@ class MatchesByDayGroupWidget extends StatelessWidget {
     final today = new DateTime(now.year, now.month, now.day);
     final tomorrow = new DateTime(now.year, now.month, now.day + 1);
 
-    var label = Text(DateFormat.MMMEd().format(_day));
+    var label = Text(DateFormat.MMMMEEEEd().format(_day));
     if (_day == today) {
       label = Text("Today");
     } else if (_day == tomorrow) {
@@ -105,7 +105,18 @@ class MatchesByDayGroupWidget extends StatelessWidget {
 
     return Column(
       children: [
-        label,
+        Card(
+          color: Colors.blueGrey.shade200,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: label,
+              ),
+            ],
+          ),
+        ),
         ..._matches.map(
           (match) => IncomingMatchCardWidget(
             match,
@@ -139,8 +150,7 @@ class IncomingMatchCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: _changed ? Colors.yellow : Colors.white,
-      elevation: 8,
+      color: _changed ? Colors.yellow.shade300 : Colors.white,
       child: Row(
         children: [
           Expanded(
